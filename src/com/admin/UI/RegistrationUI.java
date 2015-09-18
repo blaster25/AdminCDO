@@ -2,6 +2,7 @@ package com.admin.UI;
 
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.ui.Form;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
@@ -22,8 +23,11 @@ public class RegistrationUI extends VerticalLayout {
 		
 		addComponent(tab);
 		
-		tab.addTab(new FormUI(2), "Municipal Staff", FontAwesome.USERS);
-		tab.addTab(new FormUI(), "Admin Staff", FontAwesome.USERS);
+		FormUI municipal = new FormUI(2);
+		FormUI admin = new FormUI();
+		
+		tab.addTab(municipal, "Municipal Staff", FontAwesome.USERS);
+		tab.addTab(admin, "Admin Staff", FontAwesome.USERS);
 	}
 
 }

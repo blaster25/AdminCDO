@@ -9,8 +9,10 @@ import com.admin.UI.UpdateAccount;
 import com.vaadin.annotations.DesignRoot;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -19,6 +21,7 @@ public class Main extends VerticalLayout implements View {
 
 	public static String NAME = "home";
 	public static Panel views;
+	public static Long session;
 	private String previewsLink;
 
 	public Main() {
@@ -40,31 +43,38 @@ public class Main extends VerticalLayout implements View {
 	public void enter(ViewChangeEvent event) {
 		// TODO Auto-generated method stub
 		views.setStyleName(ValoTheme.PANEL_BORDERLESS);
-		
-		if(event.getParameters() == null || event.getParameters().isEmpty()) {
-			views.setContent(new HomeUI());
-		} else {
-//			System.out.println(event.getParameters());
-			switch(event.getParameters()) {
-				case "registration" :
-					views.setContent(new RegistrationUI());
-					break;
-				case "municipals" :
-					views.setContent(new MunicipalUI());
-					break;
-				case "accounts" :
-					views.setContent(new AccountsUI());
-					break;
-				case "info-settings" :
-					views.setContent(new AccountInfo());
-					break;
-				case "account-settings" :
-					views.setContent(new UpdateAccount());
-					break;
+		System.out.println("ID : " + VaadinSession.getCurrent().getAttribute("id"));
+		try{
+			session = (Long) VaadinSession.getCurrent().getAttribute("id");
+			System.out.println(session);
+			if(session == null) {
+				UI.getCurrent().getNavigator().navigateTo("");
+			} else if(event.getParameters() == null || event.getParameters().isEmpty()) {
+				views.setContent(new HomeUI());
+			} else {
+//				System.out.println(event.getParameters());
+				switch(event.getParameters()) {
+					case "registration" :
+						views.setContent(new RegistrationUI());
+						break;
+					case "municipals" :
+						views.setContent(new MunicipalUI());
+						break;
+					case "accounts" :
+						views.setContent(new AccountsUI());
+						break;
+					case "info-settings" :
+						views.setContent(new AccountInfo());
+						break;
+					case "account-settings" :
+						views.setContent(new UpdateAccount());
+						break;
+				}
 			}
+			this.previewsLink = this.NAME + "/" + event.getParameters();
+		} catch (NullPointerException e) {
+			UI.getCurrent().getNavigator().navigateTo("");
 		}
-		
-		this.previewsLink = this.NAME + "/" + event.getParameters();
 		
 //		System.out.println(this.previewsLink);
 	}
