@@ -58,8 +58,8 @@ public class NavigationMenu extends HorizontalLayout {
 		public void menuSelected(MenuItem selectedItem) {
 			// TODO Auto-generated method stub
 //			getUI().getNavigator().navigateTo(Main.NAME + "/" + this.subLink);
+			System.out.println(this.subLink);
 			if (this.isAbstract) {
-				System.out.println(this.subLink);
 				getUI().getNavigator().navigateTo(this.subLink);
 			} else {
 //				System.out.println(Main.NAME + "/" + this.subLink);

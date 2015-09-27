@@ -21,7 +21,7 @@ public class Main extends VerticalLayout implements View {
 
 	public static String NAME = "home";
 	public static Panel views;
-	public static Long session;
+	public static int session;
 	private String previewsLink;
 
 	public Main() {
@@ -45,9 +45,11 @@ public class Main extends VerticalLayout implements View {
 		views.setStyleName(ValoTheme.PANEL_BORDERLESS);
 		System.out.println("ID : " + VaadinSession.getCurrent().getAttribute("id"));
 		try{
-			session = (Long) VaadinSession.getCurrent().getAttribute("id");
-			System.out.println(session);
-			if(session == null) {
+			session = (int) VaadinSession.getCurrent().getAttribute("id");
+			
+			if(session < 0) {
+				
+				System.out.println("Less than");
 				UI.getCurrent().getNavigator().navigateTo("");
 			} else if(event.getParameters() == null || event.getParameters().isEmpty()) {
 				views.setContent(new HomeUI());

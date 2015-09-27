@@ -1,7 +1,17 @@
 package com.admin.UI;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
+
+import model.entity.Municipal;
+
+import com.example.admincdo.AdmincdoUI;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
@@ -31,6 +41,9 @@ public class FormUI extends VerticalLayout {
 	private TextField contact;
 	private TextField email;
 	private TextArea address;
+	
+	EntityManagerFactory emf = Persistence.createEntityManagerFactory(AdmincdoUI.PERSISTENT_UNIT);
+	EntityManager em = emf.createEntityManager();
 	
 	public FormUI() {
 		// TODO Auto-generated constructor stub
@@ -99,7 +112,6 @@ public class FormUI extends VerticalLayout {
 		
 		FormLayout form = new FormLayout();
 		
-		
 		form.addComponent(title);
 		if(this.type == 2)
 			form.addComponent(this.assignedMunicipal);
@@ -154,7 +166,11 @@ public class FormUI extends VerticalLayout {
 		this.dateofbirth.setCaptionAsHtml(true);
 		this.assignedMunicipal = new ComboBox("Municipal Assigned " + asterisk);
 		this.assignedMunicipal.setCaptionAsHtml(true);
-		
+		this.assignedMunicipal.setNullSelectionAllowed(false);
+		this.assignedMunicipal.setNewItemsAllowed(false);
+		this.assignedMunicipal.setFilteringMode(FilteringMode.CONTAINS);
+		this.assignedMunicipal.setContainerDataSource(new BeanItemContainer<>(Municipal.class, em.createQuery("SELECT m FROM Municipal m").getResultList()));
+		this.assignedMunicipal.setItemCaptionPropertyId("name");
 		
 		this.contact = new TextField("Contact number");
 		this.email = new TextField("E-mail Address");

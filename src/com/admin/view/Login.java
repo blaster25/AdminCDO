@@ -7,8 +7,9 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
-import model.Accounts;
-import model.Usertype;
+import model.entity.Accounts;
+import model.entity.Usertype;
+import model.service.CreateAccount;
 
 import com.example.admincdo.AdmincdoUI;
 import com.vaadin.navigator.View;
@@ -37,7 +38,6 @@ public class Login extends VerticalLayout implements View {
 	EntityManagerFactory emfactory = Persistence.createEntityManagerFactory(AdmincdoUI.PERSISTENT_UNIT);
 	EntityManager entityManager = emfactory.createEntityManager();
 	
-	
 	public Login() {
 		// TODO Auto-generated constructor stub
 		setSizeFull();
@@ -46,7 +46,7 @@ public class Login extends VerticalLayout implements View {
 		dialog.setResizable(false);
 		dialog.center();
 		
-		
+//		new CreateAccount();
 		VerticalLayout content = new VerticalLayout();
 		content.setSpacing(true);
 		content.setMargin(new MarginInfo(false, true, true, true));
@@ -62,6 +62,7 @@ public class Login extends VerticalLayout implements View {
 		content.addComponent(form);
 		
 		username.setIcon(FontAwesome.USER);
+		username.focus();
 		form.addComponent(username);
 		
 		password.setIcon(FontAwesome.LOCK);
@@ -89,7 +90,7 @@ public class Login extends VerticalLayout implements View {
 			
 			if(! list.isEmpty()) {
 				for(Accounts a: list ) {
-					Usertype type = a.getUserType();
+					Usertype type = a.getUsertype();
 					System.out.println("Usert type : " + type.getName());
 					if(type.getName().equals("Administrator")) {
 						UI.getCurrent().removeWindow(dialog);

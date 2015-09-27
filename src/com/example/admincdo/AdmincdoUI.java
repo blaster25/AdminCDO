@@ -2,7 +2,7 @@ package com.example.admincdo;
 
 import javax.servlet.annotation.WebServlet;
 
-import model.generate.ExampleData;
+import model.service.CreateAccount;
 
 import com.admin.view.Login;
 import com.admin.view.Main;
@@ -30,8 +30,6 @@ public class AdmincdoUI extends UI {
 
 		setSizeFull();
 		getPage().setTitle("Admin");
-		
-		new ExampleData();
 		
 		navigator = new Navigator(this, this);
 		

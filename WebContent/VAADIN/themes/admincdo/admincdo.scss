@@ -31,14 +31,11 @@
 
 @mixin admincdo {
   @include valo;
-  
-	.v-select-optiongroup-horizontal
-		.v-select-option {    display: inline-block; }
-
-	.v-select-optiongroup-horizontal {  white-space: nowrap; }
-
-	.v-select-optiongroup-horizontal 
-		.v-select-option.v-radiobutton { padding-right: 10px; }
-
+	.v-grid-cell.link-icon .v-button-bar button.v-edit span:before {
+  		color: blue; /* recolor icon */
+  		content: "\f0c1"; /* content-code of FontAwesome that is served by vaadin! */
+	}
+	
+	.boldheader { font-weight: 700; }
   // Insert your own theme rules here
 }
