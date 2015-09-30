@@ -1,21 +1,10 @@
 package others.filter;
 
-import org.vaadin.gridutil.cell.CellFilterComponent;
-import org.vaadin.gridutil.cell.GridCellFilter;
-
+import model.entity.Information;
 import others.helper.MStringFormatter;
 
 import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Item;
-import com.vaadin.data.Property;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.FieldEvents.TextChangeListener;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
-import com.vaadin.ui.themes.ValoTheme;
 
 public class FullnameFilter implements Filter {
 
@@ -39,9 +28,19 @@ public class FullnameFilter implements Filter {
 		if (this.value == null) {
 			return true;
 		}
-		String fullname = MStringFormatter.capetalize(""+item.getItemProperty("fname").getValue())
-							+ MStringFormatter.firstLetter(""+item.getItemProperty("mname").getValue()) + ". "
-							+ MStringFormatter.capetalize(""+item.getItemProperty("lname").getValue());
+		
+		String fullname = "";
+		if( item.getItemProperty("fname") == null ) {
+			Information information = (Information)item.getItemProperty("information").getValue();
+			fullname = MStringFormatter.capetalize(""+information.getFname())
+					+ MStringFormatter.firstLetter(""+information.getMname()) + ". "
+					+ MStringFormatter.capetalize(""+information.getLname());
+		} else {
+			fullname = MStringFormatter.capetalize(""+item.getItemProperty("fname").getValue())
+					+ MStringFormatter.firstLetter(""+item.getItemProperty("mname").getValue()) + ". "
+					+ MStringFormatter.capetalize(""+item.getItemProperty("lname").getValue());
+		}
+		
 
 		if (fullname instanceof String) {
 			String itemValue = fullname.toLowerCase();

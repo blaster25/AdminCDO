@@ -95,6 +95,7 @@ public class Accounts implements Serializable
 				+ "Username : " + this.username + "\n"
 				+ "Password : " + this.password + "\n"
 				+ "Disabled : " + this.isDisabled + "\n"
+				+ "Usertype : " + this.usertype.getName() + "\n"
 				+ "######################################";
 	}
 	

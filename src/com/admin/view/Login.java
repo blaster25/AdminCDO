@@ -8,6 +8,8 @@ import javax.persistence.Persistence;
 import javax.persistence.Query;
 
 import model.entity.Accounts;
+import model.entity.Information;
+import model.entity.User_municipal;
 import model.entity.Usertype;
 import model.service.CreateAccount;
 
@@ -47,6 +49,7 @@ public class Login extends VerticalLayout implements View {
 		dialog.center();
 		
 //		new CreateAccount();
+		
 		VerticalLayout content = new VerticalLayout();
 		content.setSpacing(true);
 		content.setMargin(new MarginInfo(false, true, true, true));

@@ -9,7 +9,7 @@ import org.vaadin.gridutil.renderer.EditDeleteButtonValueRenderer;
 import org.vaadin.gridutil.renderer.EditDeleteButtonValueRenderer.EditDeleteButtonClickListener;
 
 import others.helper.GridInitialization;
-import others.property.StringValueGenerator;
+import others.property.MStringValueGenerator;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.fieldgroup.FieldGroup;
@@ -173,7 +173,7 @@ public class MunicipalUI extends VerticalLayout {
 				return String.class;
 			}
 		});
-		gpc.addGeneratedProperty("tools", new StringValueGenerator());
+		gpc.addGeneratedProperty("tools", new MStringValueGenerator());
 		
 		return gpc;
 	}

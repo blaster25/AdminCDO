@@ -53,4 +53,43 @@ public class CustomFilter {
 		};
 		return filter;
 	}
+	
+	public static CellFilterComponent<HorizontalLayout> customFilter(final GridCellFilter cellFilter, final String columnId) {
+		CellFilterComponent<HorizontalLayout> filter = new CellFilterComponent<HorizontalLayout>() {
+
+			TextField tf = new TextField();
+
+			@Override
+			public HorizontalLayout layoutComponent() {
+				tf.addStyleName(ValoTheme.TEXTFIELD_TINY);
+				tf.setWidth(100, Unit.PERCENTAGE);
+				tf.setTextChangeEventMode(TextChangeEventMode.EAGER);
+				tf.addTextChangeListener(new TextChangeListener() {
+					
+					@Override
+					public void textChange(TextChangeEvent event) {
+						// TODO Auto-generated method stub
+
+						if(event.getText().isEmpty()) {
+							cellFilter.removeFilter(columnId);
+						} else {
+							cellFilter.replaceFilter(new MCustomFilter(columnId, event.getText()), columnId);
+						}
+					}
+				});
+				
+				HorizontalLayout hLayout = new HorizontalLayout();
+				hLayout.addStyleName("filter-header");
+				hLayout.addComponent(this.tf);
+				hLayout.setExpandRatio(this.tf, 1);
+				return hLayout;
+			}
+
+			@Override
+			public void clearFilter() {
+				this.tf.setValue(null);
+			}
+		};
+		return filter;
+	}
 }

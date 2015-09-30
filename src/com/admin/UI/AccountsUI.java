@@ -9,12 +9,15 @@ import org.vaadin.gridutil.renderer.EditDeleteButtonValueRenderer;
 import org.vaadin.gridutil.renderer.EditDeleteButtonValueRenderer.EditDeleteButtonClickListener;
 
 import model.entity.Information;
+import model.entity.Municipal;
+import model.entity.User_municipal;
 import model.service.InformationService;
+import model.service.UserService;
 import others.filter.CustomFilter;
 import others.filter.FullnameFilter;
 import others.helper.GridInitialization;
 import others.others.MGridCellFilter;
-import others.property.StringValueGenerator;
+import others.property.MStringValueGenerator;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
@@ -43,6 +46,8 @@ public class AccountsUI extends VerticalLayout {
 	private static final long serialVersionUID = 5078907091566361506L;
 	
 	InformationService service = new InformationService();
+	UserService userService = new UserService();
+	
 	GridCellFilter filter;
 	
 	public AccountsUI() {
@@ -79,6 +84,11 @@ public class AccountsUI extends VerticalLayout {
 		
 		initGpc(gpc);
 		grid.setContainerDataSource(gpc);
+		grid.removeColumn("account");
+		grid.removeColumn("mname");
+		grid.removeColumn("lname");
+		grid.removeColumn("fname");
+		grid.removeColumn("infoid");
 		initGrid(grid);
 		initHeaderCell(grid);
 		initFooterCell(grid);
@@ -94,35 +104,56 @@ public class AccountsUI extends VerticalLayout {
 		final Grid grid = new Grid();
 		layout.addComponent(grid);
 		
-		List<Information> result = service.get("Municipal");
+		List<User_municipal> result = userService.get_municipal();
 		
-		BeanItemContainer<Information> container = new BeanItemContainer<>(Information.class, result);
+		BeanItemContainer<User_municipal> container = new BeanItemContainer<>(User_municipal.class, result);
 		GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(container);
 		
-		initGpc(gpc);
+		initGpc(gpc, 1);
+		gpc.addGeneratedProperty("municipal", new MStringValueGenerator(MStringValueGenerator.OPTION_MUNICIPAL_NAME));
 		grid.setContainerDataSource(gpc);
+		grid.removeColumn("information");
+		grid.removeColumn("usermunicipalid");
 		initGrid(grid);
 		initHeaderCell(grid);
 		initFooterCell(grid);
 		initColumnAlignment(grid);
 		initFilter(grid);
+		this.filter.setCustomFilter("municipal", CustomFilter.customFilter(this.filter, "municipal"));
 		initTools(grid);
 		return layout;
 	}
 	
+	private void refreshMunicipal(Grid grid) {
+		List<User_municipal> result = userService.get_municipal();
+		
+		BeanItemContainer<User_municipal> container = new BeanItemContainer<>(User_municipal.class, result);
+		GeneratedPropertyContainer gpc = new GeneratedPropertyContainer(container);
+		
+		this.initGpc(gpc, 1);
+		
+		grid.setContainerDataSource(gpc);
+		this.initGrid(grid);
+	}
+	
 	private void initGpc(GeneratedPropertyContainer gpc) {
-		gpc.addGeneratedProperty("fullname", new StringValueGenerator(1));
-		gpc.addGeneratedProperty("tools", new StringValueGenerator());
+		
+		gpc.addGeneratedProperty("fullname", new MStringValueGenerator(MStringValueGenerator.OPTION_FORMATNAME));
+		gpc.addGeneratedProperty("tools", new MStringValueGenerator());
+	}
+	
+	private void initGpc(GeneratedPropertyContainer gpc, int option) {
+		gpc.addGeneratedProperty("municipal", new MStringValueGenerator(MStringValueGenerator.OPTION_MUNICIPAL_NAME));
+		gpc.addGeneratedProperty("fullname", new MStringValueGenerator(MStringValueGenerator.OPTION_USER_FULLNAME));
+		gpc.addGeneratedProperty("contact", new MStringValueGenerator(MStringValueGenerator.OPTION_USER_CONTACT));
+		gpc.addGeneratedProperty("email", new MStringValueGenerator(MStringValueGenerator.OPTION_USER_EMAIL));
+		gpc.addGeneratedProperty("gender", new MStringValueGenerator(MStringValueGenerator.OPTION_USER_GENDER));
+		gpc.addGeneratedProperty("tools", new MStringValueGenerator());
 	}
 	
 	private void initGrid (Grid grid) {
 
 		grid.setSizeFull();
-		grid.removeColumn("account");
-		grid.removeColumn("mname");
-		grid.removeColumn("lname");
-		grid.removeColumn("fname");
-		grid.removeColumn("infoid");
 		grid.setSelectionMode(SelectionMode.NONE);
 		grid.setColumnOrder("fullname", "gender", "contact", "email");
 		grid.setFrozenColumnCount(1);
@@ -134,7 +165,7 @@ public class AccountsUI extends VerticalLayout {
 	private void initHeaderCell (Grid grid) {
 		grid.getDefaultHeaderRow().setStyleName("boldheader");
 	}
-	private void initTools (Grid grid) {
+	private void initTools (final Grid grid) {
 		grid.getColumn("tools")
 			.setRenderer(new EditDeleteButtonValueRenderer(
 					new EditDeleteButtonClickListener() {
@@ -148,7 +179,13 @@ public class AccountsUI extends VerticalLayout {
 						@Override
 						public void onDelete(RendererClickEvent event) {
 							// TODO Auto-generated method stub
-							
+
+							if(event.getItemId() instanceof User_municipal) {
+								userService.delete_municipal((User_municipal)event.getItemId());
+								refreshMunicipal(grid);
+							} else if (event.getItemId() instanceof Information) {
+								System.out.println("Information : " + event.getItemId().toString());
+							}
 						}
 					}));
 	}

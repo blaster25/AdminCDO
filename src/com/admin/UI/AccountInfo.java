@@ -4,7 +4,6 @@ import model.entity.Information;
 import model.service.InformationService;
 
 import com.admin.view.Main;
-import com.vaadin.addon.beanvalidation.BeanValidationForm;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.validator.BeanValidator;
@@ -127,9 +126,8 @@ public class AccountInfo extends VerticalLayout {
 			public void buttonClick(ClickEvent event) {
 				// TODO Auto-generated method stub
 				try {
-//					BeanItem<Information> a = fieldGroup.getItemDataSource();
 					form.commit();
-					System.out.println(result.toString());
+					service.merger(result);
 					Notification.show("Your update was successfuly change!", Notification.TYPE_HUMANIZED_MESSAGE);
 					error.setVisible(false);
 				} catch (CommitException e) {

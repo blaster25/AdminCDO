@@ -1,34 +1,47 @@
 package com.admin.UI;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.Query;
-
+import model.entity.Accounts;
+import model.entity.Information;
 import model.entity.Municipal;
+import model.entity.User_municipal;
+import model.entity.Usertype;
+import model.service.AccountsSerivice;
+import model.service.InformationService;
+import model.service.MunicipalService;
+import model.service.UserService;
+import model.service.UsertTypeService;
+import others.helper.FormHelper;
+import others.helper.MStringFormatter;
 
-import com.example.admincdo.AdmincdoUI;
+import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.combobox.FilteringMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.OptionGroup;
+import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 public class FormUI extends VerticalLayout {
 
 // 1.) ADMIN 2.) Municipal Staff 3.) Municipal Staff With Municipal ID
-	private int type;
 	
 	
 	private TextField fname;
@@ -42,8 +55,19 @@ public class FormUI extends VerticalLayout {
 	private TextField email;
 	private TextArea address;
 	
-	EntityManagerFactory emf = Persistence.createEntityManagerFactory(AdmincdoUI.PERSISTENT_UNIT);
-	EntityManager em = emf.createEntityManager();
+	private Window progressWindow = new Window();
+	
+	
+	MunicipalService mService = new MunicipalService();
+	InformationService iService = new InformationService();
+	AccountsSerivice aService = new AccountsSerivice();
+	UsertTypeService utService = new UsertTypeService();
+	UserService userService = new UserService();
+	
+	Usertype usertype;
+	Information information;
+	
+	BeanFieldGroup<Information> beanInformation;
 	
 	public FormUI() {
 		// TODO Auto-generated constructor stub
@@ -51,8 +75,10 @@ public class FormUI extends VerticalLayout {
 		setSizeFull();
 		setSpacing(true);
 		
-		this.type = 1;
+		this.usertype = utService.get(1);
+		this.refreshForm();
 		this.init();
+		this.bind();
 		
 		addComponent(this.formLayout());
 		setComponentAlignment(getComponent(0), Alignment.MIDDLE_CENTER);
@@ -60,14 +86,17 @@ public class FormUI extends VerticalLayout {
 		setComponentAlignment(getComponent(1), Alignment.MIDDLE_CENTER);
 	}
 	
-	public FormUI(int initTpe) {
+	public FormUI(int initType) {
 		// TODO Auto-generated constructor stub
 		
 		setSizeFull();
 		setSpacing(true);
 		
-		this.type = initTpe;
+		this.usertype = utService.get(initType);
+		this.refreshForm();
 		this.init();
+		this.initMunicipal();
+		this.bind();
 
 		addComponent(this.formLayout());
 		setComponentAlignment(getComponent(0), Alignment.MIDDLE_CENTER);
@@ -76,6 +105,20 @@ public class FormUI extends VerticalLayout {
 	}
 	
 	private HorizontalLayout formLayout () {
+		
+		this.progressWindow.setClosable(false);
+		this.progressWindow.setResizable(false);
+		this.progressWindow.center();
+		this.progressWindow.setModal(true);
+		this.progressWindow.setSizeUndefined();
+		
+		VerticalLayout progressLayout = new VerticalLayout();
+		progressLayout.setMargin(true);
+		this.progressWindow.setContent(progressLayout);
+		ProgressBar bar = new ProgressBar();
+		bar.setIndeterminate(true);
+		progressLayout.addComponent(bar);
+		progressLayout.setComponentAlignment(bar, Alignment.MIDDLE_CENTER);
 		
 		HorizontalLayout layout = new HorizontalLayout();
 		layout.setSizeUndefined();
@@ -113,7 +156,7 @@ public class FormUI extends VerticalLayout {
 		FormLayout form = new FormLayout();
 		
 		form.addComponent(title);
-		if(this.type == 2)
+		if(this.usertype.getName().equals("Municipal"))
 			form.addComponent(this.assignedMunicipal);
 		
 		form.addComponent(this.contact);
@@ -134,6 +177,49 @@ public class FormUI extends VerticalLayout {
 		btn.setCaptionAsHtml(true);
 		btn.setIcon(FontAwesome.SAVE);
 		btn.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+		btn.addClickListener(new ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				// TODO Auto-generated method stub
+				String username = "";
+				UI.getCurrent().addWindow(progressWindow);
+				try {
+					try {
+						beanInformation.commit();
+						Accounts acc = FormHelper.generateAccount(usertype);
+						aService.post(acc);
+						information.setAccount(acc);
+						iService.post(information);
+						
+						username = acc.getUsername();
+						if(usertype.getName().equals("Municipal")) {
+							User_municipal user = new User_municipal();
+							user.setInformation(information);
+							user.setMunicipal((Municipal) assignedMunicipal.getValue());
+							user.setExpertise("Programmer");
+							user.setPosition("Backend");
+							userService.post_municipal(user);
+						}
+						refreshForm();
+						bind();
+//						UI.getCurrent().removeWindow(progressWindow);
+						Notification.show(MStringFormatter.firstLetter(information.getFname()) + " was successfuly registered\n"
+								+ "with an account of " +  username + ".", Type.HUMANIZED_MESSAGE);
+					} catch (CommitException e) {
+						e.printStackTrace();
+						Notification.show("Please fill up the form properly", Type.WARNING_MESSAGE);
+					} finally{
+						progressWindow.close();
+					}
+				} catch (NullPointerException e) {
+					e.printStackTrace();
+					Notification.show("Please fill up the form properly", Type.WARNING_MESSAGE);
+				} finally {
+					progressWindow.close();
+				}
+			}
+		});
 		action.addComponent(btn);
 		action.setComponentAlignment(btn, Alignment.MIDDLE_CENTER);
 		
@@ -148,35 +234,63 @@ public class FormUI extends VerticalLayout {
 		return action;
 	}
 	
+	public void refreshForm () {
+		this.information = new Information();
+		this.beanInformation = new BeanFieldGroup<Information>(Information.class);
+		this.beanInformation.setItemDataSource(this.information);
+		this.beanInformation.setBuffered(true);
+	}
+	
+	
+	public void bind () {
+		this.beanInformation.bind(this.fname, "fname");
+		this.beanInformation.bind(this.mname, "mname");
+		this.beanInformation.bind(this.lname, "lname");
+		this.beanInformation.bind(this.gender, "gender");
+		this.beanInformation.bind(this.dateofbirth, "birthdate");
+		this.beanInformation.bind(this.contact, "contact");
+		this.beanInformation.bind(this.email, "email");
+		this.beanInformation.bind(this.address, "address");
+	}
+	
 	private void init() {
 		
-		String asterisk = "<b style=\"color: red\">*</b>";
+		String requiredMsg = "The %s is required";
 		
-		this.fname = new TextField("First name " + asterisk);
-		this.fname.setCaptionAsHtml(true);
+		this.fname = new TextField("First name ");
+		this.fname.setRequired(true);
+		this.fname.setRequiredError(String.format(requiredMsg, "first name"));
 		this.mname = new TextField("Middle name");
-		this.lname = new TextField("Last name " + asterisk);
-		this.lname.setCaptionAsHtml(true);
-		this.gender = new OptionGroup("Gender " + asterisk);
-		this.gender.setCaptionAsHtml(true);
-		this.gender.setStyleName("horizontal");
+		this.lname = new TextField("Last name ");
+		this.lname.setRequired(true);
+		this.lname.setRequiredError(String.format(requiredMsg, "last name"));
+		this.gender = new OptionGroup("Gender ");
+		this.gender.setRequired(true);
+		this.gender.setRequiredError(String.format(requiredMsg, "gender"));
+		this.gender.setStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
 		this.gender.addItems("Male", "Female");		
 		
-		this.dateofbirth = new DateField("Birth date " + asterisk);
-		this.dateofbirth.setCaptionAsHtml(true);
-		this.assignedMunicipal = new ComboBox("Municipal Assigned " + asterisk);
-		this.assignedMunicipal.setCaptionAsHtml(true);
-		this.assignedMunicipal.setNullSelectionAllowed(false);
-		this.assignedMunicipal.setNewItemsAllowed(false);
-		this.assignedMunicipal.setFilteringMode(FilteringMode.CONTAINS);
-		this.assignedMunicipal.setContainerDataSource(new BeanItemContainer<>(Municipal.class, em.createQuery("SELECT m FROM Municipal m").getResultList()));
-		this.assignedMunicipal.setItemCaptionPropertyId("name");
+		this.dateofbirth = new DateField("Birth date ");
+		this.dateofbirth.setRequired(true);
+		this.dateofbirth.setRequiredError(String.format(requiredMsg, "birth date"));
 		
 		this.contact = new TextField("Contact number");
 		this.email = new TextField("E-mail Address");
-		this.address = new TextArea("Address " + asterisk);
-		this.address.setCaptionAsHtml(true);
+		this.address = new TextArea("Address ");
+		this.address.setRequired(true);
+		this.address.setRequiredError(String.format(requiredMsg, "address"));
 		this.address.setRows(5);
+	}
+	
+	private void initMunicipal () {
+		String requiredMsg = "The %s is required";
+		this.assignedMunicipal = new ComboBox("Municipal Assigned ");
+		this.assignedMunicipal.setRequired(true);
+		this.assignedMunicipal.setRequiredError(String.format(requiredMsg, "municipal assigned"));
+		this.assignedMunicipal.setNewItemsAllowed(false);
+		this.assignedMunicipal.setFilteringMode(FilteringMode.CONTAINS);
+		this.assignedMunicipal.setContainerDataSource(new BeanItemContainer<>(Municipal.class, mService.get()));
+		this.assignedMunicipal.setItemCaptionPropertyId("name");
 	}
 
 }

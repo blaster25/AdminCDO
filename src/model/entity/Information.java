@@ -50,6 +50,12 @@ public class Information implements Serializable {
 	public Information() {
 		// TODO Auto-generated constructor stub
 		super();
+		this.fname = "";
+		this.mname = "";
+		this.lname = "";
+		this.contact = "";
+		this.address = "";
+		this.email = "";
 	}
 	
 	public Information(String fname, String mname, String lname, String gender,

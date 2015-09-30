@@ -53,6 +53,15 @@ public class InformationService implements Serializable {
 		
 		em.getTransaction().commit();
 	}
+	
+	public void merger(Information information) {
+		em.getTransaction().begin();
+		
+		em.merge(information);
+		
+		em.getTransaction().commit();
+	}
+	
 	public void delete (int id) {
 		em.getTransaction().begin();
 		
